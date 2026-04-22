@@ -57,7 +57,7 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = ""
     for _, row in results.iterrows():
         for k, v in row.items():
-            msg += f"{k}: {v}
+            msg += f"{k}: {v}\n"
 "
         msg += "------
 "
