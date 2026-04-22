@@ -55,12 +55,11 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await update.message.reply_text("لا توجد نتائج")
 
     msg = ""
-    for _, row in results.iterrows():
-        for k, v in row.items():
-            msg += f"{k}: {v}\n"
-"
-        msg += "------
-"
+
+for _, row in results.iterrows():
+    for k, v in row.items():
+        msg += f"{k}: {v}\n"
+    msg += "-----------------\n"
 
     await update.message.reply_text(msg[:4000])
 
