@@ -2,11 +2,16 @@ import pandas as pd
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
-from config import TOKEN, ADMIN_ID
+# ================== CONFIG داخل الملف ==================
+TOKEN = "8742647529:AAGIFR4b0IRaTHLxnH5-L5IEoM2PYizaSFo"
+ADMIN_ID = 951388391
+# =======================================================
+
 from db import init_db, save_excel, search_all, get_stats
 
 init_db()
 
+# ---------------- MENU ----------------
 def menu():
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("🔍 بحث", callback_data="search")],
@@ -14,25 +19,28 @@ def menu():
         [InlineKeyboardButton("📊 تقرير", callback_data="report")]
     ])
 
+# ---------------- START ----------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("CRM BOT جاهز", reply_markup=menu())
+    await update.message.reply_text("🤖 CRM BOT جاهز", reply_markup=menu())
 
+# ---------------- BUTTONS ----------------
 async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q = update.callback_query
     await q.answer()
 
     if q.data == "search":
-        await q.message.reply_text("اكتب كلمة البحث")
+        await q.message.reply_text("🔍 اكتب كلمة البحث")
 
     elif q.data == "upload":
         if update.effective_user.id != ADMIN_ID:
-            return await q.message.reply_text("غير مصرح")
-        await q.message.reply_text("ارسل ملف Excel")
+            return await q.message.reply_text("❌ غير مصرح")
+        await q.message.reply_text("📂 أرسل ملف Excel")
 
     elif q.data == "report":
         stats = get_stats()
-        await q.message.reply_text(str(stats))
+        await q.message.reply_text(f"📊 التقرير:\n{stats}")
 
+# ---------------- FILE UPLOAD ----------------
 async def file_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
@@ -44,25 +52,28 @@ async def file_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     df = pd.read_excel(path)
     save_excel(df)
 
-    await update.message.reply_text("تم الرفع")
+    await update.message.reply_text("✅ تم رفع الملف بنجاح")
 
+# ---------------- SEARCH ----------------
 async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
 
     results = search_all(text)
 
     if results.empty:
-        return await update.message.reply_text("لا توجد نتائج")
+        await update.message.reply_text("❌ لا توجد نتائج")
+        return
 
-    msg = ""
+    msg = "📌 النتائج:\n\n"
 
-for _, row in results.iterrows():
-    for k, v in row.items():
-        msg += f"{k}: {v}\n"
-    msg += "-----------------\n"
+    for _, row in results.iterrows():
+        for k, v in row.items():
+            msg += f"{k}: {v}\n"
+        msg += "-----------------\n"
 
     await update.message.reply_text(msg[:4000])
 
+# ---------------- BOT START ----------------
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
