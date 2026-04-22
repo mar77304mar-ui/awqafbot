@@ -1,0 +1,4 @@
+# ضع بياناتك هنا داخل GitHub
+TOKEN = "8742647529:AAGIFR4b0IRaTHLxnH5-L5IEoM2PYizaSFo"
+ADMIN_ID = 951388391
+DB = "data.db"
